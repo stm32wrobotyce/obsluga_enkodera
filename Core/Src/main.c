@@ -104,43 +104,45 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
   HAL_TIM_Base_Start_IT(&htim6);
 
-  int i;
+  int pwm = 0, dir = CCW, inc_dec = 1;
+  uint32_t time_tick = HAL_GetTick();
+  uint32_t max_czas = 20;
+
+  drv8835_set_motorA_direction(dir);
+  drv8835_set_motorA_speed(pwm);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  drv8835_set_motorA_direction(CCW);
-
-	  for(i=0; i<100; i++)
+	  if((HAL_GetTick() - time_tick) > max_czas)
 	  {
-		  drv8835_set_motorA_speed(i);
-		  HAL_Delay(20);
-	  }
+		  pwm += inc_dec;
+		  drv8835_set_motorA_speed(pwm);
 
-	  HAL_Delay(2000);
+		  if(pwm >= 100)
+		  {
+			  inc_dec = -1;
+			  max_czas = 2000;
+		  }
+		  else if(pwm <= 0)
+		  {
+			  inc_dec = 1;
 
-	  for(i=99; i>=0; i--)
-	  {
-		  drv8835_set_motorA_speed(i);
-		  HAL_Delay(20);
-	  }
+			  if(dir == CCW)
+				  dir = CW;
+			  else if(dir == CW)
+				  dir = CCW;
 
-	  drv8835_set_motorA_direction(CW);
+			  drv8835_set_motorA_direction(dir);
+		  }
+		  else
+		  {
+			  max_czas = 20;
+		  }
 
-	  for(i=0; i<100; i++)
-	  {
-		  drv8835_set_motorA_speed(i);
-		  HAL_Delay(20);
-	  }
-
-	  HAL_Delay(2000);
-
-	  for(i=99; i>=0; i--)
-	  {
-		  drv8835_set_motorA_speed(i);
-		  HAL_Delay(20);
+		  time_tick = HAL_GetTick();
 	  }
 
     /* USER CODE END WHILE */

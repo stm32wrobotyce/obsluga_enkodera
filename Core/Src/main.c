@@ -106,7 +106,7 @@ int main(void)
 
   int pwm = 0, dir = CCW, inc_dec = 1;
   uint32_t time_tick = HAL_GetTick();
-  uint32_t max_czas = 20;
+  uint32_t max_time = 20;
 
   drv8835_set_motorA_direction(dir);
   drv8835_set_motorA_speed(pwm);
@@ -116,15 +116,17 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if((HAL_GetTick() - time_tick) > max_czas)
+	  if((HAL_GetTick() - time_tick) > max_time)
 	  {
+		  time_tick = HAL_GetTick();
+
 		  pwm += inc_dec;
 		  drv8835_set_motorA_speed(pwm);
 
 		  if(pwm >= 100)
 		  {
 			  inc_dec = -1;
-			  max_czas = 2000;
+			  max_time = 2000;
 		  }
 		  else if(pwm <= 0)
 		  {
@@ -139,10 +141,8 @@ int main(void)
 		  }
 		  else
 		  {
-			  max_czas = 20;
+			  max_time = 20;
 		  }
-
-		  time_tick = HAL_GetTick();
 	  }
 
     /* USER CODE END WHILE */
